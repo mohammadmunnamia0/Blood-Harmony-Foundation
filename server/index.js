@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
+import bloodRequestRoutes from "./routes/bloodRequests.js";
 import donorRoutes from "./routes/donors.js";
 
 dotenv.config();
@@ -13,18 +14,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
+// Connect to MongoDB
 mongoose
   .connect(
     process.env.MONGODB_URI ||
       "mongodb+srv://mdmunnamiaglobal:mongodb1321@cluster0.lfmxp.mongodb.net/bloodservice?retryWrites=true&w=majority&appName=Cluster0"
   )
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch((err) => console.error("MongoDB Connection Error:", err));
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/donors", donorRoutes);
+app.use("/api/blood-requests", bloodRequestRoutes);
 
 // Basic route for testing
 app.get("/", (req, res) => {

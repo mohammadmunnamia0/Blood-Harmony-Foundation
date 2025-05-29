@@ -40,17 +40,23 @@ const Navbar = () => {
             </Link>
             <Link
               to="/organizations"
-              className="text-gray-700 hover:text-red-600"
+              className="border-transparent text-gray-500 hover:border-red-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
             >
               Organizations
             </Link>
+            {user && (
+              <Link
+                to="/request-blood"
+                className="border-transparent text-gray-500 hover:border-red-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
+                Request Blood
+              </Link>
+            )}
 
             {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-700">
-                    Welcome, {user.fullName}
-                  </span>
+                  <span className="text-gray-700">Welcome</span>
                   <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-semibold">
                     {user.fullName.charAt(0).toUpperCase()}
                   </div>

@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../Pages/Home";
-import Hospitals from "../Pages/Hospitals";
-import Login from "../Pages/Login";
-import Organizations from "../Pages/Organizations";
-import RegisterDonor from "../Pages/RegisterDonor";
-import Root from "../Layouts/Root";
+import Root from "../layouts/Root";
+import Home from "../pages/Home";
+import Hospitals from "../pages/Hospitals";
+import Login from "../pages/Login";
+import Organizations from "../pages/Organizations";
+import RegisterDonor from "../pages/RegisterDonor";
+import RequestBlood from "../pages/RequestBlood";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/request-blood",
+        element: <RequestBlood />,
       },
     ],
   },
