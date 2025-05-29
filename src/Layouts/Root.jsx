@@ -1,30 +1,15 @@
 import { Outlet } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Nav from "../components/Nav";
-import Foot from "../components/foot";
-import WelcomeModal from "../components/WelcomeModal";
-
+import Footer from "../Components/Shared/Footer";
+import Navbar from "../Components/Shared/Navbar";
 const Root = () => {
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-
-  useEffect(() => {
-    // For testing, let's force show the modal
-    setShowWelcomeModal(true);
-
-  }, []);
-
+ 
   return (
     <div>
-      <div className="h-16">
-        <Nav></Nav>
-      </div>
-      <div className='min-h-[calc(100vh-120px)]'>
+      <Navbar></Navbar>
+      <div className='min-h-[calc(100vh-60px)]'>
         <Outlet></Outlet>
       </div>
-      <Foot></Foot>
-      {showWelcomeModal && (
-        <WelcomeModal onClose={() => setShowWelcomeModal(false)} />
-      )}
+      <Footer></Footer>
     </div>
   );
 };
