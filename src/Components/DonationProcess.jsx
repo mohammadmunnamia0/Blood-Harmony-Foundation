@@ -108,7 +108,7 @@ const DonationProcess = () => {
               three lives!
             </p>
             <button className="bg-red-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors">
-              Schedule Your Donation
+              Register As A Donor
             </button>
           </div>
         </motion.div>

@@ -110,11 +110,12 @@ const BloodTypes = () => {
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <div className="bg-gray-100 rounded-xl p-6 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+          <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-8 max-w-2xl mx-auto shadow-lg border border-red-200">
+            <h3 className="text-2xl font-bold text-red-700 mb-4 flex">
+              <span className="mr-2">💡</span>
               Did You Know?
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-700 text-lg leading-relaxed">
               Type O- blood is known as the universal donor because it can be
               given to patients of any blood type. Type AB+ blood is known as
               the universal recipient because it can receive blood from any

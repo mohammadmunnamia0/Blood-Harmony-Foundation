@@ -23,9 +23,6 @@ const Hero = () => {
               <button className="bg-white text-red-600 px-8 py-3 rounded-full font-semibold hover:bg-red-50 transition-colors">
                 Donate Now
               </button>
-              <button className="border-2 border-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors">
-                Learn More
-              </button>
             </div>
           </motion.div>
           <motion.div
