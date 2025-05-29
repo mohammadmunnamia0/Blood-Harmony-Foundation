@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import image from "../../public/Hero/hero.jpg"
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -37,10 +38,10 @@ const Hero = () => {
             className="hidden md:block"
           >
             <div className="relative">
-              <div className="w-full h-[400px] bg-red-200 rounded-lg overflow-hidden">
+              <div className="w-full h-[400px] rounded-lg overflow-hidden">
                 {/* Add your hero image here */}
-                <div className="w-full h-full bg-red-300 flex items-center justify-center">
-                  <span className="text-red-600 text-lg">Hero Image</span>
+                <div className="w-full h-full  flex items-center justify-center">
+                  <img className="rounded-xl" src={image} alt="" />
                 </div>
               </div>
             </div>
