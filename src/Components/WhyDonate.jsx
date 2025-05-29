@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const WhyDonate = () => {
+  const navigate = useNavigate();
+
   const reasons = [
     {
       title: "Save Lives",
@@ -73,7 +76,10 @@ const WhyDonate = () => {
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <div className="inline-block bg-red-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors cursor-pointer">
+          <div
+            onClick={() => navigate("/register-donor")}
+            className="inline-block bg-red-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors cursor-pointer"
+          >
             Become a Donor Today
           </div>
         </motion.div>

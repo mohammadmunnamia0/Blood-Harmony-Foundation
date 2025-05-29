@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const DonationProcess = () => {
+  const navigate = useNavigate();
+
   const steps = [
     {
       number: "01",
@@ -107,7 +110,10 @@ const DonationProcess = () => {
               screening, donation, and recovery. Your donation can save up to
               three lives!
             </p>
-            <button className="bg-red-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors">
+            <button
+              onClick={() => navigate("/register-donor")}
+              className="bg-red-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors"
+            >
               Register As A Donor
             </button>
           </div>

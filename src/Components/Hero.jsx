@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="relative min-h-[80vh] bg-gradient-to-r from-red-600 to-red-800 text-white">
       <div className="absolute inset-0 bg-black/50"></div>
@@ -20,7 +22,10 @@ const Hero = () => {
               supply for those in need.
             </p>
             <div className="flex gap-4">
-              <button className="bg-white text-red-600 px-8 py-3 rounded-full font-semibold hover:bg-red-50 transition-colors">
+              <button
+                onClick={() => navigate("/register-donor")}
+                className="bg-white text-red-600 px-8 py-3 rounded-full font-semibold hover:bg-red-50 transition-colors"
+              >
                 Donate Now
               </button>
             </div>
