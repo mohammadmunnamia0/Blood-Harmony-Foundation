@@ -30,8 +30,8 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Right Side - Navigation Links */}
-          <div className="flex items-center space-x-8">
+          {/* Center - Navigation Links */}
+          <div className="hidden md:flex space-x-8">
             <Link to="/" className="text-gray-700 hover:text-red-600">
               Home
             </Link>
@@ -40,49 +40,61 @@ const Navbar = () => {
             </Link>
             <Link
               to="/organizations"
-              className="border-transparent text-gray-500 hover:border-red-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              className="text-gray-700 hover:text-red-600"
             >
               Organizations
             </Link>
-            {user && (
-              <Link
-                to="/request-blood"
-                className="border-transparent text-gray-500 hover:border-red-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Request Blood
-              </Link>
-            )}
+            <Link
+              to="/blood-requests"
+              className="text-gray-700 hover:text-red-600"
+            >
+              Blood Requests
+            </Link>
+          </div>
 
+          {/* Right Side - Auth Buttons/User Menu */}
+          <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
+                <Link
+                  to="/request-blood"
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                >
+                  Request Blood
+                </Link>
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-700">Welcome</span>
-                  <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-semibold">
-                    {user.fullName.charAt(0).toUpperCase()}
+                  
+                  <span className="text-gray-700">
+                    Welcome,
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                    <span className="text-red-600 font-medium">
+                      {user.fullName?.charAt(0) || user.email?.charAt(0)}
+                    </span>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="border border-red-600 text-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors"
+                  className="text-gray-700 hover:text-red-600"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <>
+              <div className="flex items-center space-x-4">
                 <Link
                   to="/register-donor"
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                  className="text-gray-700 hover:text-red-600"
                 >
-                  Register as a Donor
+                  Register as Donor
                 </Link>
                 <Link
                   to="/login"
-                  className="border border-red-600 text-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors"
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
                 >
                   Login
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>

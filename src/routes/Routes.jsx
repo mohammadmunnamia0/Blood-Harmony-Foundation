@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import Root from "../layouts/Root";
+import BloodRequestDashboard from "../pages/BloodRequestDashboard";
 import Home from "../pages/Home";
 import Hospitals from "../pages/Hospitals";
 import Login from "../pages/Login";
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "/request-blood",
         element: <RequestBlood />,
+      },
+      {
+        path: "/blood-requests",
+        element: <BloodRequestDashboard />,
       },
     ],
   },

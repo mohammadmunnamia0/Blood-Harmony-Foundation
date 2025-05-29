@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import image from "../../public/Hero/hero.jpg"
+import image from "/Hero/hero.jpg"
 
 const Hero = () => {
   const navigate = useNavigate();
