@@ -24,7 +24,7 @@ const Hero = () => {
 
   return (
     <div className="relative min-h-[80vh] bg-gradient-to-r from-red-600 to-red-800 text-white">
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="absolute inset-0 "></div>
       <div className="container mx-auto px-4 py-20 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
