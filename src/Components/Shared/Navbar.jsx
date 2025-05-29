@@ -69,13 +69,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-6">
-                <Link
-                  to="/request-blood"
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2.5 rounded-full hover:from-red-500 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-red-500/30"
-                >
-                  Request Blood
-                </Link>
-                <div className="flex items-center space-x-3">
+                 <div className="flex items-center space-x-3">
                   <span className="text-gray-600">Welcome,</span>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center shadow-lg hover:shadow-red-500/30 transform hover:scale-105 transition-all duration-300">
                     <span className="text-white font-medium">
@@ -83,6 +77,13 @@ const Navbar = () => {
                     </span>
                   </div>
                 </div>
+                <Link
+                  to="/request-blood"
+                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2.5 rounded-full hover:from-red-500 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-red-500/30"
+                >
+                  Request Blood
+                </Link>
+               
                 <button
                   onClick={handleLogout}
                   className="relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-medium text-red-600 transition duration-300 ease-out border-2 border-red-500 rounded-full shadow-md group"

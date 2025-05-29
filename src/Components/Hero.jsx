@@ -16,7 +16,7 @@ const Hero = () => {
 
   const handleRequestBlood = () => {
     if (isAuthenticated) {
-      navigate("/register-donor");
+      navigate("/request-blood");
     } else {
       setShowModal(true);
     }
