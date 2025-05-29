@@ -9,13 +9,35 @@ const BloodRequestDashboard = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        console.log("Fetching blood requests...");
         const response = await axios.get(
           "http://localhost:5000/api/blood-requests"
         );
+        console.log("Blood requests response:", response.data);
         setRequests(response.data);
       } catch (error) {
         console.error("Error fetching blood requests:", error);
-        setError("Failed to load blood requests");
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          setError(
+            `Failed to load blood requests: ${
+              error.response.data.message || error.message
+            }`
+          );
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("No response received:", error.request);
+          setError(
+            "No response from server. Please check if the server is running."
+          );
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error("Error setting up request:", error.message);
+          setError(`Failed to load blood requests: ${error.message}`);
+        }
       } finally {
         setLoading(false);
       }
