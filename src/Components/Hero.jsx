@@ -1,9 +1,26 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import image from "/Hero/hero.jpg"
+import Modal from "./Modal";
+import image from "/Hero/hero.jpg";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleRequestBlood = () => {
+    if (isAuthenticated) {
+      navigate("/register-donor");
+    } else {
+      setShowModal(true);
+    }
+  };
 
   return (
     <div className="relative min-h-[80vh] bg-gradient-to-r from-red-600 to-red-800 text-white">
@@ -29,6 +46,12 @@ const Hero = () => {
               >
                 Donate Now
               </button>
+              <button
+                onClick={handleRequestBlood}
+                className="bg-white text-red-600 px-8 py-3 rounded-full font-semibold hover:bg-red-50 transition-colors"
+              >
+                Request Blood
+              </button>
             </div>
           </motion.div>
           <motion.div
@@ -48,6 +71,14 @@ const Hero = () => {
           </motion.div>
         </div>
       </div>
+
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        message="Please register first, then log in to request blood."
+        buttonText="Register as Donor"
+        buttonAction="/register-donor"
+      />
     </div>
   );
 };
