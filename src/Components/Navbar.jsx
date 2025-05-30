@@ -31,7 +31,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="text-white font-bold text-xl">
-                Blood Service
+                BloodBridge Foundation
               </Link>
             </div>
             <div className="hidden md:block">

@@ -23,10 +23,10 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-[80vh] bg-gradient-to-r from-red-600 to-red-800 text-white">
+    <div className="relative lg:min-h-[90vh] bg-gradient-to-r from-red-600 to-red-800 text-white">
       <div className="absolute inset-0 "></div>
       <div className="container mx-auto px-4 py-20 relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center ">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -58,7 +58,7 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="hidden md:block"
+            className=" md:block"
           >
             <div className="relative">
               <div className="w-full h-[400px] rounded-lg overflow-hidden">

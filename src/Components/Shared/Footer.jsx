@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold">Blood Service</h3>
+            <h3 className="text-xl font-bold">BloodBridge Foundation</h3>
             <p className="text-gray-400">
               Saving lives through blood donation. Join our mission to help
               those in need.
@@ -124,7 +124,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-gray-400">
-              <li>123 Blood Service Street</li>
+              <li>123 BloodBridge Foundation Street</li>
               <li>City, State 12345</li>
               <li>Phone: (123) 456-7890</li>
               <li>Email: info@bloodservice.com</li>
@@ -135,7 +135,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Blood Service. All rights
+            &copy; {new Date().getFullYear()} BloodBridge Foundation. All rights
             reserved.
           </p>
         </div>

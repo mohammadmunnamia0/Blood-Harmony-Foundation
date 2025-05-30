@@ -30,7 +30,7 @@ app.use("/api/blood-requests", bloodRequestRoutes);
 
 // Basic route for testing
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Blood Service API" });
+  res.json({ message: "Welcome to BloodBridge Foundation API" });
 });
 
 // Error handling middleware
