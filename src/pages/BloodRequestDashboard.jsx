@@ -19,7 +19,7 @@ const BloodRequestDashboard = () => {
       status: "pending",
       contactName: "Sarah Smith",
       contactPhone: "+1 234-567-8901",
-      isStatic: true
+      isStatic: true,
     },
     {
       _id: "static2",
@@ -32,7 +32,7 @@ const BloodRequestDashboard = () => {
       status: "approved",
       contactName: "Carlos Garcia",
       contactPhone: "+1 234-567-8902",
-      isStatic: true
+      isStatic: true,
     },
     {
       _id: "static3",
@@ -45,7 +45,7 @@ const BloodRequestDashboard = () => {
       status: "fulfilled",
       contactName: "Lisa Chen",
       contactPhone: "+1 234-567-8903",
-      isStatic: true
+      isStatic: true,
     },
     {
       _id: "static4",
@@ -58,8 +58,8 @@ const BloodRequestDashboard = () => {
       status: "pending",
       contactName: "James Wilson",
       contactPhone: "+1 234-567-8904",
-      isStatic: true
-    }
+      isStatic: true,
+    },
   ];
 
   useEffect(() => {
@@ -70,8 +70,8 @@ const BloodRequestDashboard = () => {
           "http://localhost:5000/api/blood-requests"
         );
         console.log("Blood requests response:", response.data);
-        // Combine static and real data
-        setRequests([...staticRequests, ...response.data]);
+        // Only show real data when available
+        setRequests(response.data);
       } catch (error) {
         console.error("Error fetching blood requests:", error);
         if (error.response) {
@@ -82,19 +82,19 @@ const BloodRequestDashboard = () => {
               error.response.data.message || error.message
             }`
           );
-          // If there's an error, still show static data
+          // If there's an error, show static data
           setRequests(staticRequests);
         } else if (error.request) {
           console.error("No response received:", error.request);
           setError(
             "No response from server. Please check if the server is running."
           );
-          // If there's an error, still show static data
+          // If there's an error, show static data
           setRequests(staticRequests);
         } else {
           console.error("Error setting up request:", error.message);
           setError(`Failed to load blood requests: ${error.message}`);
-          // If there's an error, still show static data
+          // If there's an error, show static data
           setRequests(staticRequests);
         }
       } finally {
