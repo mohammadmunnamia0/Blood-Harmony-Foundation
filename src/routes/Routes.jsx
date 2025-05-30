@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import Root from "../Layouts/Root";
 import BloodRequestDashboard from "../pages/BloodRequestDashboard";
 import Home from "../pages/Home";
 import Hospitals from "../pages/Hospitals";
@@ -6,12 +7,11 @@ import Login from "../pages/Login";
 import Organizations from "../pages/Organizations";
 import RegisterDonor from "../pages/RegisterDonor";
 import RequestBlood from "../pages/RequestBlood";
-import Root from "../layouts/Root";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root/>,
+    element: <Root />,
     children: [
       {
         path: "/",
