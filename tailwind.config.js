@@ -17,7 +17,14 @@ export default {
       "dark",
       "garden",
       "dim",
-    ]
-  },
+    ],
+    darkTheme: "light",
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: false,
+    themeRoot: ":root",
+  }
 }
 
