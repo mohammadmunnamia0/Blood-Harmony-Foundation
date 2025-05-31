@@ -67,7 +67,10 @@ const BloodRequestDashboard = () => {
       try {
         console.log("Fetching blood requests...");
         const response = await axios.get(
-          "http://localhost:5000/api/blood-requests"
+          `${
+            import.meta.env.VITE_BLOOD_API ||
+            "https://bloodbridge-server.vercel.app"
+          }/api/blood-requests`
         );
         console.log("Blood requests response:", response.data);
         // Only show real data when available

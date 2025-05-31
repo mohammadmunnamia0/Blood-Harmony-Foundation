@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import Root from '../layouts/Root';
+import Root from "../layouts/Root";
 import BloodRequestDashboard from "../pages/BloodRequestDashboard";
 import Home from "../pages/Home";
 import Hospitals from "../pages/Hospitals";
@@ -22,7 +22,7 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: "/blood-request-dashboard",
+        path: "/blood-requests",
         element: <BloodRequestDashboard />,
       },
       {
