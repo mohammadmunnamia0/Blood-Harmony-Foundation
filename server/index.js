@@ -12,13 +12,32 @@ dotenv.config();
 const app = express();
 
 // CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://bloodbridge-foundation.vercel.app",
+  "https://blood-bridge-foundation.web.app",
+  "https://blood-bridge-foundation.firebaseapp.com",
+];
+
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://bloodbridge-foundation.vercel.app",
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) === -1) {
+      console.log("Blocked by CORS:", origin);
+      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    console.log("Allowed by CORS:", origin);
+    return callback(null, true);
+  },
   credentials: true,
-  optionalSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
+  maxAge: 600,
 };
 
 // Middleware

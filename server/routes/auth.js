@@ -101,7 +101,9 @@ router.post("/login", async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    res.json({
+    // Ensure we're sending a proper JSON response
+    return res.status(200).json({
+      success: true,
       token,
       user: {
         id: user._id,
@@ -112,7 +114,11 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 

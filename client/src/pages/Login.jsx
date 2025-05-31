@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useState } from "react";
+import axios from "../utils/axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,14 +14,29 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "/api/auth/login",
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
       );
 
+      if (!response.data || !response.data.token || !response.data.user) {
+        throw new Error("Invalid response from server");
+      }
+
       const { token, user } = response.data;
+
+      // Validate user data before storing
+      if (!user || typeof user !== "object") {
+        throw new Error("Invalid user data received");
+      }
 
       // Store token and user data
       localStorage.setItem("token", token);
@@ -33,6 +48,8 @@ const Login = () => {
       console.error("Login error:", error);
       if (error.response?.data?.message) {
         setError(error.response.data.message);
+      } else if (error.message === "Network Error") {
+        setError("Unable to connect to the server. Please try again later.");
       } else {
         setError("An error occurred during login. Please try again.");
       }
@@ -70,7 +87,9 @@ const Login = () => {
               Welcome Back
             </h2>
             <p className="text-sm text-gray-600">
-              Sign in to continue your journey of saving lives
+<p className="text-lg text-green-600">
+Before login you must have to register as a donor.
+</p>              Sign in to continue your journey of saving lives
             </p>
           </div>
 

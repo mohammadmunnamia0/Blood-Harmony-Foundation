@@ -7,9 +7,23 @@ const Navbar = () => {
 
   useEffect(() => {
     // Get user from localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser === "object") {
+          setUser(parsedUser);
+        } else {
+          // If invalid data, clear it
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      // Clear invalid data
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     }
   }, []);
 
