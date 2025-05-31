@@ -7,7 +7,10 @@
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
     "client": "npm run dev --prefix client",
-    "dev:full": "concurrently \"npm run dev\" \"npm run client\""
+    "dev:full": "concurrently \"npm run dev\" \"npm run client\"",
+    "build": "npm run build:client",
+    "build:client": "npm run build --prefix client",
+    "preview": "npm run preview --prefix client"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
