@@ -65,13 +65,13 @@ const BloodRequestDashboard = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        const apiUrl = `${
+          import.meta.env.VITE_BLOOD_API ||
+          "https://bloodbridge-server.vercel.app"
+        }/api/blood-requests`;
+        console.log("Using API URL:", apiUrl);
         console.log("Fetching blood requests...");
-        const response = await axios.get(
-          `${
-            import.meta.env.VITE_BLOOD_API ||
-            "https://bloodbridge-server.vercel.app"
-          }/api/blood-requests`
-        );
+        const response = await axios.get(apiUrl);
         console.log("Blood requests response:", response.data);
         // Only show real data when available
         setRequests(response.data);
