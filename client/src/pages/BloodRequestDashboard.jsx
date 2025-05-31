@@ -9,18 +9,34 @@ const BloodRequestDashboard = () => {
   // Get the API URL based on environment
   const getApiUrl = async () => {
     if (import.meta.env.DEV) {
-      // Try ports 5000-5010 for local development
+      // Try port 50001 first since that's where the server is running
+      try {
+        const response = await fetch(
+          `http://localhost:50001/api/blood-requests`
+        );
+        if (response.ok) {
+          return `http://localhost:50001/api/blood-requests`;
+        }
+      } catch (error) {
+        console.log("Port 50001 not available, trying other ports...");
+      }
+
+      // Fallback to trying other ports
       for (let port = 5000; port <= 5010; port++) {
+        if (port === 50001) continue; // Skip 50001 since we already tried it
         try {
-          const response = await fetch(`http://localhost:${port}`);
+          const response = await fetch(
+            `http://localhost:${port}/api/blood-requests`
+          );
           if (response.ok) {
             return `http://localhost:${port}/api/blood-requests`;
           }
         } catch (error) {
+          console.log(`Port ${port} not available, trying next...`);
           continue;
         }
       }
-      return "http://localhost:5000/api/blood-requests"; // fallback
+      throw new Error("No available server ports found");
     }
     return "https://bloodbridge-server.vercel.app/api/blood-requests";
   };
@@ -84,43 +100,67 @@ const BloodRequestDashboard = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        setLoading(true);
+        setError("");
+        console.log("Starting to fetch blood requests...");
         const API_URL = await getApiUrl();
         console.log("Using API URL:", API_URL);
+
+        // Test the API endpoint first
+        try {
+          const testResponse = await fetch(API_URL);
+          console.log("Test response status:", testResponse.status);
+          console.log(
+            "Test response headers:",
+            Object.fromEntries(testResponse.headers.entries())
+          );
+        } catch (testError) {
+          console.error("Test request failed:", testError);
+        }
+
         const response = await axios.get(API_URL, {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
           withCredentials: false,
+          timeout: 5000,
         });
-        console.log("Blood requests response:", response.data);
-        // Only show real data when available
-        setRequests(response.data);
+
+        console.log("Full response:", response);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+        console.log("Blood requests response data:", response.data);
+
+        if (response.data && Array.isArray(response.data)) {
+          console.log("Setting requests with data:", response.data);
+          setRequests(response.data);
+        } else {
+          console.error("Invalid response format:", response.data);
+          throw new Error("Invalid response format");
+        }
       } catch (error) {
         console.error("Error fetching blood requests:", error);
         if (error.response) {
           console.error("Error response data:", error.response.data);
           console.error("Error response status:", error.response.status);
+          console.error("Error response headers:", error.response.headers);
           setError(
             `Failed to load blood requests: ${
               error.response.data.message || error.message
             }`
           );
-          // If there's an error, show static data
-          setRequests(staticRequests);
         } else if (error.request) {
           console.error("No response received:", error.request);
           setError(
             "No response from server. Please check if the server is running."
           );
-          // If there's an error, show static data
-          setRequests(staticRequests);
         } else {
           console.error("Error setting up request:", error.message);
           setError(`Failed to load blood requests: ${error.message}`);
-          // If there's an error, show static data
-          setRequests(staticRequests);
         }
+        console.log("Falling back to static data");
+        setRequests(staticRequests);
       } finally {
         setLoading(false);
       }

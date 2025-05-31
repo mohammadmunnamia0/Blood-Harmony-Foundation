@@ -17,25 +17,18 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://blood-bridge-foundation.web.app",
   "https://blood-bridge-foundation.firebaseapp.com",
+  "https://bloodbridge-foundation.vercel.app",
+  "http://localhost:5000",
+  "http://localhost:50001",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) === -1) {
-        console.log("Blocked by CORS:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      }
-      return callback(null, true);
-    },
-    credentials: false,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
-  })
-);
+// Enable CORS for all routes
+app.use(cors({
+  origin: true, // Allow all origins
+  credentials: false,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+}));
 
 // Add request logger middleware
 app.use((req, res, next) => {
@@ -51,20 +44,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-// Add CORS headers middleware
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,PUT,POST,DELETE,OPTIONS,PATCH"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Content-Length, X-Requested-With"
-  );
-  next();
-});
-
 // MongoDB connection with retry logic
 const connectDB = async () => {
   const maxRetries = 3;
@@ -78,7 +57,10 @@ const connectDB = async () => {
       }
 
       console.log("Attempting to connect to MongoDB...");
-      console.log("Connection string:", process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
+      console.log(
+        "Connection string:",
+        process.env.MONGODB_URI.replace(/:[^:@]+@/, ":****@")
+      ); // Hide password in logs
 
       const options = {
         useNewUrlParser: true,
@@ -87,7 +69,7 @@ const connectDB = async () => {
         socketTimeoutMS: 45000,
         connectTimeoutMS: 10000,
         retryWrites: true,
-        retryReads: true
+        retryReads: true,
       };
 
       await mongoose.connect(process.env.MONGODB_URI, options);
@@ -96,27 +78,26 @@ const connectDB = async () => {
       console.log("Connection state:", mongoose.connection.readyState);
 
       // Handle connection events
-      mongoose.connection.on('error', (err) => {
-        console.error('MongoDB connection error:', err);
+      mongoose.connection.on("error", (err) => {
+        console.error("MongoDB connection error:", err);
       });
 
-      mongoose.connection.on('disconnected', () => {
-        console.log('MongoDB disconnected. Attempting to reconnect...');
+      mongoose.connection.on("disconnected", () => {
+        console.log("MongoDB disconnected. Attempting to reconnect...");
         if (retryCount < maxRetries) {
           retryCount++;
           setTimeout(tryConnect, 5000);
         }
       });
 
-      mongoose.connection.on('reconnected', () => {
-        console.log('MongoDB reconnected');
+      mongoose.connection.on("reconnected", () => {
+        console.log("MongoDB reconnected");
         retryCount = 0;
       });
-
     } catch (err) {
       console.error("MongoDB connection error:", err);
       retryCount++;
-      
+
       if (retryCount < maxRetries) {
         console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
         setTimeout(tryConnect, 5000);
