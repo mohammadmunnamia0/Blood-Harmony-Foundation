@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import auth from "../middleware/auth.js";
 import BloodRequest from "../models/BloodRequest.js";
 
@@ -143,13 +144,47 @@ router.post("/", auth, async (req, res) => {
 // Get all blood requests (public access)
 router.get("/", async (req, res) => {
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.error(
+        "MongoDB not connected. Current state:",
+        mongoose.connection.readyState
+      );
+      return res.status(503).json({
+        message: "Database connection not available",
+        error: "Service temporarily unavailable",
+      });
+    }
+
     const requests = await BloodRequest.find()
       .populate("requestedBy", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!requests) {
+      return res.status(404).json({ message: "No blood requests found" });
+    }
+
     res.json(requests);
   } catch (error) {
-    console.error("Error fetching blood requests:", error);
-    res.status(500).json({ message: "Error fetching blood requests" });
+    console.error("Error fetching blood requests:", {
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Handle specific MongoDB errors
+    if (error.name === "MongoError" || error.name === "MongoServerError") {
+      return res.status(503).json({
+        message: "Database error",
+        error: "Service temporarily unavailable",
+      });
+    }
+
+    res.status(500).json({
+      message: "Error fetching blood requests",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 

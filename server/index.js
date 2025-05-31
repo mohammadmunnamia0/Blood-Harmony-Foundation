@@ -13,58 +13,128 @@ const app = express();
 
 // CORS configuration
 const allowedOrigins = [
-  "http://localhost:3000",
   "http://localhost:5173",
-  "https://bloodbridge-foundation.vercel.app",
+  "http://localhost:3000",
   "https://blood-bridge-foundation.web.app",
   "https://blood-bridge-foundation.firebaseapp.com",
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) === -1) {
-      console.log("Blocked by CORS:", origin);
-      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
-      return callback(new Error(msg), false);
-    }
-    console.log("Allowed by CORS:", origin);
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  exposedHeaders: ["Content-Range", "X-Content-Range"],
-  maxAge: 600,
-};
+      if (allowedOrigins.indexOf(origin) === -1) {
+        console.log("Blocked by CORS:", origin);
+        return callback(new Error("Not allowed by CORS"));
+      }
+      return callback(null, true);
+    },
+    credentials: false,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  })
+);
+
+// Add request logger middleware
+app.use((req, res, next) => {
+  console.log(
+    `${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${
+      req.headers.origin
+    }`
+  );
+  next();
+});
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
+// Add CORS headers middleware
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,OPTIONS,PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Content-Length, X-Requested-With"
+  );
+  next();
+});
+
 // MongoDB connection with retry logic
 const connectDB = async () => {
-  try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is not defined in environment variables");
-    }
+  const maxRetries = 3;
+  let retryCount = 0;
 
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("Connected to MongoDB");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    // Don't throw the error, just log it
-  }
+  const tryConnect = async () => {
+    try {
+      if (!process.env.MONGODB_URI) {
+        throw new Error("MONGODB_URI is not defined in environment variables");
+      }
+
+      const options = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        connectTimeoutMS: 10000,
+        retryWrites: true,
+        retryReads: true,
+      };
+
+      await mongoose.connect(process.env.MONGODB_URI, options);
+      console.log("Connected to MongoDB successfully");
+
+      // Handle connection events
+      mongoose.connection.on("error", (err) => {
+        console.error("MongoDB connection error:", err);
+      });
+
+      mongoose.connection.on("disconnected", () => {
+        console.log("MongoDB disconnected. Attempting to reconnect...");
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(tryConnect, 5000);
+        }
+      });
+
+      mongoose.connection.on("reconnected", () => {
+        console.log("MongoDB reconnected");
+        retryCount = 0;
+      });
+    } catch (err) {
+      console.error("MongoDB connection error:", err);
+      retryCount++;
+
+      if (retryCount < maxRetries) {
+        console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
+        setTimeout(tryConnect, 5000);
+      } else {
+        console.error("Failed to connect to MongoDB after multiple retries");
+        // Don't throw the error, just log it
+      }
+    }
+  };
+
+  await tryConnect();
 };
 
 // Connect to MongoDB
 connectDB();
+
+// Add error handling for unhandled rejections
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
+// Add error handling for uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -78,7 +148,34 @@ app.get("/", (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Error details:", {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString(),
+  });
+
+  if (err.name === "ValidationError") {
+    return res.status(400).json({
+      message: "Validation Error",
+      errors: Object.values(err.errors).map((e) => e.message),
+    });
+  }
+
+  if (err.name === "JsonWebTokenError") {
+    return res.status(401).json({
+      message: "Invalid token",
+    });
+  }
+
+  if (err.name === "TokenExpiredError") {
+    return res.status(401).json({
+      message: "Token expired",
+    });
+  }
+
   res.status(500).json({
     message: "Something went wrong!",
     error: process.env.NODE_ENV === "development" ? err.message : undefined,
@@ -87,10 +184,28 @@ app.use((err, req, res, next) => {
 
 // For local development
 if (process.env.NODE_ENV !== "production") {
+  const startServer = async (port) => {
+    try {
+      const server = app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+      });
+
+      server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+          console.log(`Port ${port} is in use, trying ${port + 1}...`);
+          server.close();
+          startServer(port + 1);
+        } else {
+          console.error("Error starting server:", error);
+        }
+      });
+    } catch (error) {
+      console.error("Error starting server:", error);
+    }
+  };
+
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  startServer(PORT);
 }
 
 // For Vercel
