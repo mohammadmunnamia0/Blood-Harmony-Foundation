@@ -5,7 +5,8 @@ const getBaseURL = () => {
   if (import.meta.env.DEV) {
     return "http://localhost:5000";
   }
-  return "https://bloodbridge-server.vercel.app";
+  // Use the new deployment URL for production
+  return "https://blood-bridge-foundation-ksjr0rdh9.vercel.app";
 };
 
 const instance = axios.create({

@@ -1,5 +1,5 @@
 import cookieParser from "cookie-parser";
-// import cors from "cors"; // Remove or comment out this line
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
@@ -11,37 +11,37 @@ dotenv.config();
 
 const app = express();
 
-// // CORS configuration - Remove or comment out this block
-// const allowedOrigins = [
-//   "http://localhost:3000",
-//   "http://localhost:5173",
-//   "https://bloodbridge-foundation.vercel.app",
-//   "https://blood-bridge-foundation.web.app",
-//   "https://blood-bridge-foundation.firebaseapp.com",
-// ];
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://bloodbridge-foundation.vercel.app",
+  "https://blood-bridge-foundation.web.app",
+  "https://blood-bridge-foundation.firebaseapp.com",
+];
 
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return callback(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
 
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       console.log("Blocked by CORS:", origin);
-//       const msg = "The CORS policy for this site does not allow access from the specified Origin.";
-//       return callback(new Error(msg), false);
-//     }
-//     console.log("Allowed by CORS:", origin);
-//     return callback(null, true);
-//   },
-//   credentials: true,
-//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-//   exposedHeaders: ["Content-Range", "X-Content-Range"],
-//   maxAge: 600,
-// };
+    if (allowedOrigins.indexOf(origin) === -1) {
+      console.log("Blocked by CORS:", origin);
+      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    console.log("Allowed by CORS:", origin);
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
+  maxAge: 600,
+};
 
 // Middleware
-// app.use(cors(corsOptions)); // Remove or comment out this line
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
