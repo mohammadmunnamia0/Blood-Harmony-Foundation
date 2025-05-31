@@ -6,6 +6,25 @@ const BloodRequestDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Get the API URL based on environment
+  const getApiUrl = async () => {
+    if (import.meta.env.DEV) {
+      // Try ports 5000-5010 for local development
+      for (let port = 5000; port <= 5010; port++) {
+        try {
+          const response = await fetch(`http://localhost:${port}`);
+          if (response.ok) {
+            return `http://localhost:${port}/api/blood-requests`;
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+      return "http://localhost:5000/api/blood-requests"; // fallback
+    }
+    return "https://bloodbridge-server.vercel.app/api/blood-requests";
+  };
+
   // Static fake data
   const staticRequests = [
     {
@@ -65,9 +84,15 @@ const BloodRequestDashboard = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get(
-          "https://bloodbridge-server.vercel.app/api/blood-requests"
-        );
+        const API_URL = await getApiUrl();
+        console.log("Using API URL:", API_URL);
+        const response = await axios.get(API_URL, {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          withCredentials: false,
+        });
         console.log("Blood requests response:", response.data);
         // Only show real data when available
         setRequests(response.data);

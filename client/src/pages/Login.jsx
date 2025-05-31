@@ -13,19 +13,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "/api/auth/login",
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post("/api/auth/login", {
+        email,
+        password,
+      });
 
       if (!response.data || !response.data.token || !response.data.user) {
         throw new Error("Invalid response from server");
@@ -69,13 +60,13 @@ const Login = () => {
             "Every drop of blood you donate is a lifeline for someone in need.
             Your generosity today could save a life tomorrow."
           </p>
-          <div className="mt-8">
+          {/* <div className="mt-8">
             <img
               src="https://images.unsplash.com/photo-1615461065921-4b7b7b1e0b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
               alt="Blood donation illustration"
               className="rounded-lg shadow-2xl"
             />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -87,9 +78,10 @@ const Login = () => {
               Welcome Back
             </h2>
             <p className="text-sm text-gray-600">
-<p className="text-lg text-green-600">
-Before login you must have to register as a donor.
-</p>              Sign in to continue your journey of saving lives
+              <p className="text-lg text-green-600">
+                Before login you must have to register as a donor.
+              </p>{" "}
+              Sign in to continue your journey of saving lives
             </p>
           </div>
 

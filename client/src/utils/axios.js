@@ -1,32 +1,25 @@
 import axios from "axios";
 
-// Determine the base URL based on the environment
-const getBaseURL = () => {
-  if (import.meta.env.DEV) {
-    return "http://localhost:5000";
-  }
-  // Use the new deployment URL for production
-  return "https://blood-bridge-foundation-ksjr0rdh9.vercel.app";
-};
+const baseURL = import.meta.env.PROD
+  ? "https://bloodbridge-server.vercel.app"
+  : "http://localhost:5000";
 
-const instance = axios.create({
-  baseURL: getBaseURL(),
+const axiosInstance = axios.create({
+  baseURL,
+  withCredentials: false,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
-  withCredentials: true,
-  timeout: 10000, // 10 seconds timeout
 });
 
-// Add a request interceptor
-instance.interceptors.request.use(
+// Request interceptor
+axiosInstance.interceptors.request.use(
   (config) => {
-    // Add timestamp to prevent caching
-    config.params = {
-      ...config.params,
-      _t: Date.now(),
-    };
-
+    if (config.method === "get") {
+      config.params = { ...config.params, _t: Date.now() };
+    }
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -34,29 +27,36 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor
-instance.interceptors.response.use(
-  (response) => {
-    // Check if the response is empty
-    if (!response.data) {
-      return Promise.reject(new Error("Empty response from server"));
-    }
-    return response;
-  },
+// Response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => response,
   (error) => {
-    console.error("API Error:", error.response || error);
-    if (error.response?.status === 401) {
-      // Clear local storage and redirect to login
+    if (!error.response) {
+      return Promise.reject({
+        message:
+          "Unable to connect to the server. Please check your internet connection.",
+      });
+    }
+
+    if (error.response.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
+      return Promise.reject({
+        message: "Session expired. Please login again.",
+      });
     }
-    return Promise.reject(error);
+
+    return Promise.reject({
+      message: error.response.data.message || "An error occurred",
+      status: error.response.status,
+    });
   }
 );
 
-export default instance;
+export default axiosInstance;

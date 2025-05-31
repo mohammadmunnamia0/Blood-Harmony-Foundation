@@ -73,8 +73,12 @@ const connectDB = async () => {
   const tryConnect = async () => {
     try {
       if (!process.env.MONGODB_URI) {
+        console.error("MONGODB_URI is not defined in environment variables");
         throw new Error("MONGODB_URI is not defined in environment variables");
       }
+
+      console.log("Attempting to connect to MongoDB...");
+      console.log("Connection string:", process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
 
       const options = {
         useNewUrlParser: true,
@@ -83,33 +87,36 @@ const connectDB = async () => {
         socketTimeoutMS: 45000,
         connectTimeoutMS: 10000,
         retryWrites: true,
-        retryReads: true,
+        retryReads: true
       };
 
       await mongoose.connect(process.env.MONGODB_URI, options);
       console.log("Connected to MongoDB successfully");
+      console.log("Database name:", mongoose.connection.name);
+      console.log("Connection state:", mongoose.connection.readyState);
 
       // Handle connection events
-      mongoose.connection.on("error", (err) => {
-        console.error("MongoDB connection error:", err);
+      mongoose.connection.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
       });
 
-      mongoose.connection.on("disconnected", () => {
-        console.log("MongoDB disconnected. Attempting to reconnect...");
+      mongoose.connection.on('disconnected', () => {
+        console.log('MongoDB disconnected. Attempting to reconnect...');
         if (retryCount < maxRetries) {
           retryCount++;
           setTimeout(tryConnect, 5000);
         }
       });
 
-      mongoose.connection.on("reconnected", () => {
-        console.log("MongoDB reconnected");
+      mongoose.connection.on('reconnected', () => {
+        console.log('MongoDB reconnected');
         retryCount = 0;
       });
+
     } catch (err) {
       console.error("MongoDB connection error:", err);
       retryCount++;
-
+      
       if (retryCount < maxRetries) {
         console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
         setTimeout(tryConnect, 5000);
