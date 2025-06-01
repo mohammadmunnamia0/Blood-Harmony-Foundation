@@ -1,6 +1,5 @@
 # 🩸 Blood Bridge Foundation - A Life-Saving Blood Donation Platform
 
-![Blood Harmony Banner](https://postimg.cc/XZFCD1mK)
 
 > **Mission:** A secure and scalable web platform built to support blood donation, help people in emergencies, and build a strong ecosystem around life-saving support.
 
