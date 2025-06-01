@@ -1,4 +1,4 @@
-# 🩸 Blood Harmony Foundation - A Life-Saving Blood Donation Platform
+# 🩸 Blood Bridge Foundation - A Life-Saving Blood Donation Platform
 
 ![Blood Harmony Banner](https://postimg.cc/XZFCD1mK)
 
