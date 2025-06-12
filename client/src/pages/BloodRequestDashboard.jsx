@@ -1,47 +1,15 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from "../Components/Modal";
 
 const BloodRequestDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
-  // Get the API URL based on environment
-  const getApiUrl = async () => {
-    if (import.meta.env.DEV) {
-      // Try port 50001 first since that's where the server is running
-      try {
-        const response = await fetch(
-          `http://localhost:50001/api/blood-requests`
-        );
-        if (response.ok) {
-          return `http://localhost:50001/api/blood-requests`;
-        }
-      } catch (error) {
-        console.log("Port 50001 not available, trying other ports...");
-      }
-
-      // Fallback to trying other ports
-      for (let port = 5000; port <= 5010; port++) {
-        if (port === 50001) continue; // Skip 50001 since we already tried it
-        try {
-          const response = await fetch(
-            `http://localhost:${port}/api/blood-requests`
-          );
-          if (response.ok) {
-            return `http://localhost:${port}/api/blood-requests`;
-          }
-        } catch (error) {
-          console.log(`Port ${port} not available, trying next...`);
-          continue;
-        }
-      }
-      throw new Error("No available server ports found");
-    }
-    return "https://bloodbridge-server.vercel.app/api/blood-requests";
-  };
-
-  // Static fake data
+  // Static dummy data
   const staticRequests = [
     {
       _id: "static1",
@@ -55,6 +23,7 @@ const BloodRequestDashboard = () => {
       contactName: "Sarah Smith",
       contactPhone: "+1 234-567-8901",
       isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 5), // 5 days ago
     },
     {
       _id: "static2",
@@ -68,6 +37,7 @@ const BloodRequestDashboard = () => {
       contactName: "Carlos Garcia",
       contactPhone: "+1 234-567-8902",
       isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 4), // 4 days ago
     },
     {
       _id: "static3",
@@ -81,6 +51,7 @@ const BloodRequestDashboard = () => {
       contactName: "Lisa Chen",
       contactPhone: "+1 234-567-8903",
       isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 3), // 3 days ago
     },
     {
       _id: "static4",
@@ -94,79 +65,130 @@ const BloodRequestDashboard = () => {
       contactName: "James Wilson",
       contactPhone: "+1 234-567-8904",
       isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 2), // 2 days ago
+    },
+    {
+      _id: "static5",
+      patientName: "Michael Brown",
+      bloodType: "O-",
+      units: 2,
+      hospital: "Regional Medical Center",
+      urgency: "urgent",
+      requiredDate: new Date(Date.now() + 345600000), // 4 days from now
+      status: "pending",
+      contactName: "Jennifer Brown",
+      contactPhone: "+1 234-567-8905",
+      isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 1), // 1 day ago
+    },
+    {
+      _id: "static6",
+      patientName: "Sophia Lee",
+      bloodType: "A+",
+      units: 3,
+      hospital: "Memorial Hospital",
+      urgency: "normal",
+      requiredDate: new Date(Date.now() + 518400000), // 6 days from now
+      status: "approved",
+      contactName: "Robert Lee",
+      contactPhone: "+1 234-567-8906",
+      isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 0.5), // 12 hours ago
+    },
+    {
+      _id: "static7",
+      patientName: "James Wilson",
+      bloodType: "B-",
+      units: 2,
+      hospital: "Community Hospital",
+      urgency: "emergency",
+      requiredDate: new Date(Date.now() + 86400000), // tomorrow
+      status: "pending",
+      contactName: "Emily Wilson",
+      contactPhone: "+1 234-567-8907",
+      isStatic: true,
+      createdAt: new Date(Date.now() - 86400000 * 0.25), // 6 hours ago
     },
   ];
 
+  const handleRequestBlood = () => {
+    // Check if user is registered
+    const isRegistered = localStorage.getItem("isAuthenticated") === "true";
+
+    if (!isRegistered) {
+      setShowModal(true);
+    } else {
+      navigate("/register-donor");
+    }
+  };
+
   useEffect(() => {
-    const fetchRequests = async () => {
+    const loadRequests = () => {
       try {
         setLoading(true);
         setError("");
-        console.log("Starting to fetch blood requests...");
-        const API_URL = await getApiUrl();
-        console.log("Using API URL:", API_URL);
 
-        // Test the API endpoint first
-        try {
-          const testResponse = await fetch(API_URL);
-          console.log("Test response status:", testResponse.status);
-          console.log(
-            "Test response headers:",
-            Object.fromEntries(testResponse.headers.entries())
-          );
-        } catch (testError) {
-          console.error("Test request failed:", testError);
-        }
+        // Get user requests from localStorage
+        const userRequests = JSON.parse(
+          localStorage.getItem("bloodRequests") || "[]"
+        );
 
-        const response = await axios.get(API_URL, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          withCredentials: false,
-          timeout: 5000,
+        // Ensure user requests have isStatic flag set to false
+        const processedUserRequests = userRequests.map((request) => ({
+          ...request,
+          isStatic: false,
+        }));
+
+        // Combine user requests with static requests, ensuring user requests come first
+        const allRequests = [...processedUserRequests, ...staticRequests];
+
+        // Sort all requests by createdAt (newest first)
+        const sortedRequests = allRequests.sort((a, b) => {
+          // Always put non-static (user) requests first
+          if (!a.isStatic && b.isStatic) return -1;
+          if (a.isStatic && !b.isStatic) return 1;
+          // Then sort by date
+          return new Date(b.createdAt) - new Date(a.createdAt);
         });
 
-        console.log("Full response:", response);
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
-        console.log("Blood requests response data:", response.data);
-
-        if (response.data && Array.isArray(response.data)) {
-          console.log("Setting requests with data:", response.data);
-          setRequests(response.data);
-        } else {
-          console.error("Invalid response format:", response.data);
-          throw new Error("Invalid response format");
-        }
+        setRequests(sortedRequests);
       } catch (error) {
-        console.error("Error fetching blood requests:", error);
-        if (error.response) {
-          console.error("Error response data:", error.response.data);
-          console.error("Error response status:", error.response.status);
-          console.error("Error response headers:", error.response.headers);
-          setError(
-            `Failed to load blood requests: ${
-              error.response.data.message || error.message
-            }`
-          );
-        } else if (error.request) {
-          console.error("No response received:", error.request);
-          setError(
-            "No response from server. Please check if the server is running."
-          );
-        } else {
-          console.error("Error setting up request:", error.message);
-          setError(`Failed to load blood requests: ${error.message}`);
-        }
-        console.log("Falling back to static data");
+        console.error("Error loading blood requests:", error);
+        setError("Failed to load blood requests");
+        // Fallback to static data
         setRequests(staticRequests);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRequests();
+    loadRequests();
+
+    // Listen for new blood requests
+    const handleStorageChange = (e) => {
+      if (e.key === "bloodRequests") {
+        const userRequests = JSON.parse(e.newValue || "[]");
+        // Ensure user requests have isStatic flag set to false
+        const processedUserRequests = userRequests.map((request) => ({
+          ...request,
+          isStatic: false,
+        }));
+        // Combine user requests with static requests
+        const allRequests = [...processedUserRequests, ...staticRequests];
+        // Sort all requests
+        const sortedRequests = allRequests.sort((a, b) => {
+          // Always put non-static (user) requests first
+          if (!a.isStatic && b.isStatic) return -1;
+          if (a.isStatic && !b.isStatic) return 1;
+          // Then sort by date
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setRequests(sortedRequests);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const getStatusColor = (status) => {
@@ -242,16 +264,27 @@ const BloodRequestDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Blood Request Dashboard
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              View all blood donation requests
-            </p>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Blood Requests</h1>
+          <div className="flex gap-4">
+            <button
+              onClick={handleRequestBlood}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Request Blood
+            </button>
           </div>
+        </div>
 
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          message="Can't request blood without Register then login"
+          buttonText="Register As Donor"
+          buttonAction="/register-donor"
+        />
+
+        <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -284,10 +317,20 @@ const BloodRequestDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {requests.map((request) => (
-                  <tr key={request._id} className="hover:bg-gray-50">
+                  <tr
+                    key={request._id}
+                    className={`hover:bg-gray-50 ${
+                      !request.isStatic ? "bg-blue-50" : ""
+                    }`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {request.patientName}
+                        {!request.isStatic && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            New
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

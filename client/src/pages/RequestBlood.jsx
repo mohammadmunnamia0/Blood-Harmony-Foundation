@@ -86,7 +86,7 @@ const RequestBlood = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/blood-requests",
+        "/api/blood-requests",
         {
           patientName,
           bloodType,

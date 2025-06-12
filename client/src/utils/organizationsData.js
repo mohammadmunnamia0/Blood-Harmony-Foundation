@@ -14,7 +14,7 @@ export const organizationsData = {
       id: 2,
       name: "SANDHANI",
       description:
-        "A pioneer in voluntary blood donation, established in 1977. Operates units in 25 medical and dental colleges across Bangladesh.",
+        "A pioneer in voluntary blood donation, established in 1978. Operates units in 25 medical and dental colleges across Bangladesh.",
       website: "https://en.wikipedia.org/wiki/Sandhani",
       category: "National",
       icon: "🩸",

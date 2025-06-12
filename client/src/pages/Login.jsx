@@ -1,11 +1,16 @@
 import { useState } from "react";
-import axios from "../utils/axios";
+import { useNavigate } from "react-router-dom";
+
+// Static credentials
+const STATIC_EMAIL = "donor@bloodbridge.com";
+const STATIC_PASSWORD = "BloodBridge@123";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,37 +18,40 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/auth/login", {
-        email,
-        password,
-      });
-
-      if (!response.data || !response.data.token || !response.data.user) {
-        throw new Error("Invalid response from server");
+      // Check if credentials match static values
+      if (email !== STATIC_EMAIL || password !== STATIC_PASSWORD) {
+        setError("Invalid email or password");
+        setLoading(false);
+        return;
       }
 
-      const { token, user } = response.data;
-
-      // Validate user data before storing
-      if (!user || typeof user !== "object") {
-        throw new Error("Invalid user data received");
+      // Check if user is registered
+      const isRegistered = localStorage.getItem("isRegistered");
+      if (!isRegistered) {
+        setError("Please register as a donor first before logging in");
+        setLoading(false);
+        return;
       }
 
-      // Store token and user data
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Get donor data from localStorage
+      const donors = JSON.parse(localStorage.getItem("donors") || "[]");
+      const donor = donors.find((d) => d.email === STATIC_EMAIL);
 
-      // Force a page reload to update the navbar state
+      if (!donor) {
+        setError("Please register as a donor first before logging in");
+        setLoading(false);
+        return;
+      }
+
+      // Store authentication data
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user", JSON.stringify(donor));
+
+      // Redirect to home page
       window.location.href = "/";
     } catch (error) {
       console.error("Login error:", error);
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.message === "Network Error") {
-        setError("Unable to connect to the server. Please try again later.");
-      } else {
-        setError("An error occurred during login. Please try again.");
-      }
+      setError("An error occurred during login. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -83,6 +91,22 @@ const Login = () => {
               </p>{" "}
               Sign in to continue your journey of saving lives
             </p>
+
+            {/* Static Credentials Display */}
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-green-800 mb-2">
+                Static Credentials For Login
+              </h3>
+              <div className="space-y-2">
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Email:</span> {STATIC_EMAIL}
+                </p>
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Password:</span>{" "}
+                  {STATIC_PASSWORD}
+                </p>
+              </div>
+            </div>
           </div>
 
           {error && (

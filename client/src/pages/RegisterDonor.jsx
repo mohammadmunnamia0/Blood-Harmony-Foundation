@@ -1,9 +1,9 @@
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Access the environment variable
-const API_BASE_URL = import.meta.env.BLOOD_API; 
+// Static credentials
+const STATIC_EMAIL = "donor@bloodbridge.com";
+const STATIC_PASSWORD = "BloodBridge@123";
 
 const RegisterDonor = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -19,7 +19,7 @@ const RegisterDonor = () => {
     const formData = new FormData(e.target);
     const data = {
       fullName: formData.get("fullName"),
-      email: formData.get("email"),
+      email: STATIC_EMAIL, // Using static email
       phone: formData.get("phone"),
       dateOfBirth: formData.get("dateOfBirth"),
       gender: formData.get("gender"),
@@ -31,16 +31,8 @@ const RegisterDonor = () => {
       weight: Number(formData.get("weight")),
       lastDonation: formData.get("lastDonation") || null,
       medicalConditions: formData.get("medicalConditions"),
-      password: formData.get("password"),
-      confirmPassword: formData.get("confirmPassword"),
+      password: STATIC_PASSWORD, // Using static password
     };
-
-    // Validate passwords match
-    if (data.password !== data.confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
 
     // Validate weight
     if (data.weight < 45) {
@@ -50,23 +42,36 @@ const RegisterDonor = () => {
     }
 
     try {
-      // Use the environment variable for the base URL
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/register`,
-        data
-      );
+      // Store donor data in localStorage
+      const donors = JSON.parse(localStorage.getItem("donors") || "[]");
 
-      // Store the token in localStorage
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // Check if donor already exists
+      const existingDonor = donors.find(
+        (donor) => donor.email === STATIC_EMAIL
+      );
+      if (existingDonor) {
+        setError(
+          "A donor with these credentials already exists. Please login instead."
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Add new donor
+      donors.push(data);
+      localStorage.setItem("donors", JSON.stringify(donors));
+
+      // Store authentication data
+      localStorage.setItem("isRegistered", "true");
+      localStorage.setItem("user", JSON.stringify(data));
 
       setShowSuccessModal(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error) {
-      console.error("Registration error:", error.response?.data);
-      setError(
-        error.response?.data?.message ||
-          "Registration failed. Please check your information and try again."
-      );
+      console.error("Registration error:", error);
+      setError("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -84,6 +89,22 @@ const RegisterDonor = () => {
             <p className="mt-2 text-sm text-gray-600 text-center">
               Join our lifesaving mission by becoming a blood donor
             </p>
+
+            {/* Static Credentials Display */}
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg text-center">
+              <h3 className="text-lg font-semibold text-green-800 mb-2">
+                 Credentials (Required for Registration  Login)
+              </h3>
+              <div className="space-y-2">
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Email:</span> {STATIC_EMAIL}
+                </p>
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Password:</span>{" "}
+                  {STATIC_PASSWORD}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Error Message */}
@@ -145,21 +166,6 @@ const RegisterDonor = () => {
                       id="fullName"
                       name="fullName"
                       type="text"
-                      required
-                      className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Email address *
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
                       required
                       className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
                     />
@@ -277,7 +283,7 @@ const RegisterDonor = () => {
                         htmlFor="state"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        State/Province *
+                        State *
                       </label>
                       <input
                         id="state"
@@ -292,7 +298,7 @@ const RegisterDonor = () => {
                         htmlFor="zipCode"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        ZIP/Postal Code *
+                        ZIP Code *
                       </label>
                       <input
                         id="zipCode"
@@ -306,7 +312,7 @@ const RegisterDonor = () => {
                 </div>
               </div>
 
-              {/* Donation Information Section */}
+              {/* Medical Information Section */}
               <div className="bg-gray-50 rounded-xl p-6 space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <svg
@@ -319,10 +325,10 @@ const RegisterDonor = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
                     />
                   </svg>
-                  Donation Information
+                  Medical Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -379,28 +385,6 @@ const RegisterDonor = () => {
                       className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Health Information Section */}
-              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-2 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
-                  </svg>
-                  Health Information
-                </h3>
-                <div className="space-y-4">
                   <div>
                     <label
                       htmlFor="medicalConditions"
@@ -413,93 +397,17 @@ const RegisterDonor = () => {
                       name="medicalConditions"
                       rows="3"
                       className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                      placeholder="Please list any medical conditions, medications, or allergies"
-                    />
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="terms"
-                        name="terms"
-                        type="checkbox"
-                        required
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition duration-150 ease-in-out"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label
-                        htmlFor="terms"
-                        className="font-medium text-gray-700"
-                      >
-                        I confirm that I meet all eligibility requirements for
-                        blood donation *
-                      </label>
-                    </div>
+                      placeholder="Please list any medical conditions or medications"
+                    ></textarea>
                   </div>
                 </div>
               </div>
 
-              {/* Account Security Section */}
-              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-2 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                  Account Security
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Password *
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      minLength="8"
-                      className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                      placeholder="Minimum 8 characters"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Confirm Password *
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      required
-                      minLength="8"
-                      className="mt-1 block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                      placeholder="Re-enter your password"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4">
+              <div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:scale-[1.02] ${
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out ${
                     loading ? "opacity-75 cursor-not-allowed" : ""
                   }`}
                 >
@@ -539,66 +447,29 @@ const RegisterDonor = () => {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            {/* Background overlay */}
-            <div
-              className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-              onClick={() => setShowSuccessModal(false)}
-            />
-
-            {/* Modal panel */}
-            <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg
-                      className="w-6 h-6 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">
-                      Registration Successful!
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Thank you for registering as a blood donor. Your account
-                        has been created successfully. You can now log in using
-                        your email and password.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setShowSuccessModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => {
-                    setShowSuccessModal(false);
-                    navigate("/login");
-                  }}
-                >
-                  Go to Login
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">
+                Registration Successful!
+              </h3>
+              <p className="mt-2 text-sm text-gray-500">
+                You have successfully registered as a blood donor. You will be
+                redirected to the login page.
+              </p>
             </div>
           </div>
         </div>
